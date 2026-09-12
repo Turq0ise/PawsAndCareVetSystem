@@ -5,18 +5,21 @@ class Owner:
         self.contact_number = contact_number
 
 class Pet:
-    def __init__(self,pet_id,name,species,owner_id):
+    def __init__(self,pet_id,owner_id,name,species,age):
         self.pet_id = pet_id
+        self.owner_id = owner_id
         self.name = name
         self.species = species
-        self.owner_id = owner_id
+        self.age = age
 
 class Appointment:
-    def __init__(self,appointment_id,pet_id,date,time, status= "Scheduled"):
+    def __init__(self,appointment_id,pet_id,reason,date,time, status):
         self.appointment_id= appointment_id
         self.pet_id= pet_id
+        self.reason = reason
         self.date = date
         self.time = time
+        self.status = status
 
 class PetFactory:
     @staticmethod
