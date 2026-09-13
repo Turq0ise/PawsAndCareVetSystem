@@ -1,7 +1,7 @@
 import unittest
 from database import ClinicDatabase
 from models import Owner, PetFactory
-from appointment_manager import AppointmentManager
+from services.appointment_manager import AppointmentManager
 
 class TestAppointmentSystem(unittest.TestCase):
     def setUp(self):

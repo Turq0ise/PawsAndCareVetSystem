@@ -1,15 +1,97 @@
+import sqlite3
+import datetime
+from modules.idGen import idGen
+
 class ClinicDatabase:
     _instance = None
 
-    def __new__(cls):
+    def __new__(cls, db_name="clinic.db"):
         if cls._instance is None:
-            cls._instance = super().__new__(cls)
-            cls._instance.owners = {}
-            cls._instance.pets = {}
-            cls._instance.appointments = {}
+            cls._instance = super(ClinicDatabase, cls).__new__(cls)
+            cls._instance._initialized = False
         return cls._instance
 
-    def clear_database(self):
-        self.owners.clear()
-        self.pets.clear()
-        self.appointments.clear()
+    def __init__(self, db_name="clinic.db"):
+        # Prevent re-initialization if the singleton instance already exists
+        if getattr(self, "_initialized", False):
+            return
+
+        self.db_name = db_name
+        self.connection = sqlite3.connect(self.db_name)
+        # Enable row access by column name
+        self.connection.row_factory = sqlite3.Row
+        
+        # Enforce foreign key constraints in SQLite
+        self.connection.execute("PRAGMA foreign_keys = ON;")
+        
+        self._create_tables()
+        self._initialized = True
+
+    def _create_tables(self):
+        """Creates the required tables if they do not already exist."""
+        cursor = self.connection.cursor()
+
+        # 1. Owners Table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS owners (
+                owner_id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
+                contact_number TEXT NOT NULL
+            );
+        """)
+
+        # 2. Pets Table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS pets (
+                pet_id TEXT PRIMARY KEY
+                owner_id text REFERENCES owners(owner_id) ON DELETE CASCADE,
+                name TEXT NOT NULL,
+                species TEXT NOT NULL CHECK(species IN ('Dog', 'Cat', 'Bird', 'Rabbit')),
+                age INTEGER
+            );
+        """)
+
+        # 3. Appointments Table
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS appointments (
+                appointment_id TEXT PRIMARY KEY,
+                pet_id TEXT REFERENCES pet(pet_id) ON DELETE CASCADE,
+                reason TEXT,
+                date DATE,
+                time TIME,
+                status TEXT DEFAULT 'Scheduled' CHECK(status IN ('Scheduled', 'Completed', 'Cancelled'))
+            );
+        """)
+
+        self.connection.commit()
+
+    def execute_query(self, query: str, params: tuple = ()):
+        """Executes an INSERT, UPDATE, or DELETE query and commits changes."""
+        cursor = self.connection.cursor()
+        cursor.execute(query, params)
+        self.connection.commit()
+        return cursor
+
+    def fetch_all(self, query: str, params: tuple = ()):
+        """Executes a SELECT query and returns all matching rows."""
+        cursor = self.connection.cursor()
+        cursor.execute(query, params)
+        return cursor.fetchall()
+
+    def fetch_one(self, query: str, params: tuple = ()):
+        """Executes a SELECT query and returns a single matching row."""
+        cursor = self.connection.cursor()
+        cursor.execute(query, params)
+        return cursor.fetchone()
+
+    def close(self):
+        """Closes the active database connection."""
+        if self.connection:
+            self.connection.close()
+
+    @classmethod
+    def reset_instance(cls):
+        """Helper to clear singleton state - useful between unit tests."""
+        if cls._instance:
+            cls._instance.close()
+        cls._instance = None

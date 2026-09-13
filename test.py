@@ -21,7 +21,7 @@ cursor.execute('''
 
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS pets (
-        pet_id TEXT PRIMARY KEY, I can tell
+        pet_id TEXT PRIMARY KEY,
         owner_id text REFERENCES owners(owner_id)
         name TEXT NOT NULL,
         species TEXT NOT NULL,
