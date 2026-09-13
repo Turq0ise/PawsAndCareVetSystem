@@ -14,7 +14,7 @@ class TestScheduleAppointment(unittest.TestCase):
         self.appointment_management = AppointmentManagement(self.db)
 
         self.owner = self.owner_management.register_owner("Pedro Penduko", "09191234567")
-        self.pet = self.pet_management.add_pet(self.owner.owner_id, "Cat", "Ming")
+        self.pet = self.pet_management.add_pet(self.owner.owner_id, "Cat", "Ming", 2)
 
     def tearDown(self):
         ClinicDatabase.reset_instance()

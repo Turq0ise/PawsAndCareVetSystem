@@ -1,6 +1,5 @@
 import sqlite3
 import datetime
-from modules.idGen import idGen
 
 class ClinicDatabase:
     _instance = None
@@ -16,7 +15,10 @@ class ClinicDatabase:
             return
 
         self.db_name = db_name
-        self.connection = sqlite3.connect(self.db_name)
+        if db_name == ":memory:":
+            self.connection = sqlite3.connect("file:cachedb?mode=memory&cache=shared", uri=True)
+        else:
+            self.connection = sqlite3.connect(self.db_name)
         self.connection.row_factory = sqlite3.Row
         
         self.connection.execute("PRAGMA foreign_keys = ON;")
@@ -37,7 +39,7 @@ class ClinicDatabase:
         """)
 
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS owners (
+            CREATE TABLE IF NOT EXISTS pets (
                 pet_id TEXT PRIMARY KEY,
                 owner_id TEXT NOT NULL,
                 name TEXT NOT NULL,

@@ -14,7 +14,7 @@ class TestCancelAppointment(unittest.TestCase):
         self.appointment_management = AppointmentManagement(self.db)
 
         self.owner = self.owner_management.register_owner("Ana Reyes", "09201234567")
-        self.pet = self.pet_management.add_pet(self.owner.owner_id, "Dog", "Baron")
+        self.pet = self.pet_management.add_pet(self.owner.owner_id, "Dog", "Baron", 4)
         self.appointment = self.appointment_management.schedule_appointment(
             pet_id=self.pet.pet_id,
             date="2026-10-20",

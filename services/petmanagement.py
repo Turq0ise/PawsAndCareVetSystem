@@ -5,8 +5,8 @@ from models import Pet, PetFactory
 class PetManagement:
     """Service layer handling business logic for Pets."""
 
-    def __init__(self, db):
-        self.db = db or ClinicDatabase()
+    def __init__(self, db=None):
+        self.db = db if db is not None else ClinicDatabase()
 
     def add_pet(self, owner_id, pet_type, name, age):
         """Creates a pet via PetFactory and links it to an existing owner.
@@ -30,6 +30,9 @@ class PetManagement:
         if not clean_owner_id:
             raise ValueError("Owner ID cannot be empty.")
 
+        if age is not None and age < 0:
+            raise ValueError("Pet age cannot be negative.")
+
         owner_exists = self.db.fetch_one(
             "SELECT owner_id FROM owners WHERE owner_id = ?", (clean_owner_id,)
         )
@@ -45,7 +48,7 @@ class PetManagement:
 
         query = """
             INSERT INTO pets (pet_id, owner_id, name, species, age)
-            VALUES (?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?)
         """
         try:
             self.db.execute_query(
