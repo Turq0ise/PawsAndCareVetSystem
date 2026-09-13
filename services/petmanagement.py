@@ -1,82 +1,107 @@
-class pet:
-    def __init__(self, pet_name, species, age, owner_id):
-        self.pet_id = pet_name
-        self.species = species
-        self.age = age
-        self.owner_id = owner_id
-
-    def display_info(self):
-        print("Pet Name: " + str(self.pet_id))
-        print("Species: " + self.species)
-        print("Pet Age: " + str(self.age))
-        print("Owner ID: " + str(self.owner_id))
-
-    def get_info(self):
-        return f"{self.pet_id} is a {self.age}-year-old {self.species}."
-    
-class dog(pet):
-    pass
-
-class cat(pet):
-    pass    
-
-class bird(pet):
-    pass    
-
-class rabbit(pet):
-    pass    
+import sqlite3
+from database import ClinicDatabase
+from models import Pet, PetFactory
 
 class PetManagement:
+    """Service layer handling business logic for Pets."""
 
-    def __init__(self):
-        self.pets = []
+    def __init__(self, db):
+        self.db = db or ClinicDatabase()
 
-    def add_pet(self):
-        pet_name = input("Enter pet name: ")
-        species = input("Enter species: ")
-        age = int(input("Enter pet age: "))
-        owner_id = input("Enter owner ID: ")
+    def add_pet(self, owner_id, pet_type, name, age):
+        """Creates a pet via PetFactory and links it to an existing owner.
 
-        if species.lower() == "dog":
-            new_pet = dog(pet_name, species, age, owner_id)
+        Args:
+            owner_id: The UUID of the pet's owner.
+            pet_type: The species (Dog, Cat, Bird, Rabbit).
+            name: The pet's name.
 
-        elif species.lower() == "cat":
-            new_pet = cat(pet_name, species, age, owner_id)
+        Returns:
+            Pet: The concrete Pet subclass instance (Dog, Cat, etc.).
 
-        elif species.lower() == "bird":
-            new_pet = bird(pet_name, species, age, owner_id)
+        Raises:
+            ValueError: If validation fails, species is invalid, or owner does not exist.
+        """
+        clean_name = name.strip()
+        clean_owner_id = owner_id.strip()
 
-        elif species.lower() == "rabbit":
-            new_pet = rabbit(pet_name, species, age, owner_id)
+        if not clean_name:
+            raise ValueError("Pet name cannot be empty.")
+        if not clean_owner_id:
+            raise ValueError("Owner ID cannot be empty.")
 
-        else:
-            new_pet = pet(pet_name, species, age, owner_id)
+        # Ensure the owner exists in the database before assigning a pet
+        owner_exists = self.db.fetch_one(
+            "SELECT owner_id FROM owners WHERE owner_id = ?", (clean_owner_id,)
+        )
+        if not owner_exists:
+            raise ValueError(f"Owner with ID '{clean_owner_id}' does not exist.")
 
-        self.pets.append(new_pet)
-        print("Pet record added successfully.")
+        # Instantiates the appropriate subclass using PetFactory
+        pet = PetFactory.create_pet(
+            species=pet_type,
+            name=clean_name,
+            owner_id=clean_owner_id,
+            age=age,
+        )
 
-    def view_pets(self):
-        if not self.pets:
-            print("No pet records found.")
-            return
+        query = """
+            INSERT INTO pets (pet_id, owner_id, name, species, age)
+            VALUES (?, ?, ?, ?)
+        """
+        try:
+            self.db.execute_query(
+                query, (pet.pet_id, pet.owner_id, pet.name, pet.species, pet.age)
+            )
+        except sqlite3.IntegrityError as e:
+            raise ValueError(f"Failed to add pet: {e}")
 
-        for pet in self.pets:
-            pet.display_info()
-            print("--------------------")
+        return pet
 
-    def view_owner_pets(self, owner_id):
-        found = False
+    def get_pet_by_id(self, pet_id):
+        """Retrieves a single pet by its UUID and reconstructs it via PetFactory."""
+        query = "SELECT pet_id, owner_id, name, species, age FROM pets WHERE pet_id = ?"
+        row = self.db.fetch_one(query, (pet_id,))
 
-        for pet in self.pets:
-            if pet.owner_id == owner_id:
-                pet.display_info()
-                print("--------------------")
-                found = True
+        if not row:
+            return None
 
-        if not found:
-            print("No pets found for the given owner ID.")
+        return PetFactory.create_pet(
+            species=row["species"],
+            name=row["name"],
+            owner_id=row["owner_id"],
+            age=row["age"],
+            pet_id=row["pet_id"],
+        )
 
+    def get_pets_by_owner(self, owner_id):
+        """Retrieves all pets belonging to a specific owner."""
+        query = "SELECT pet_id, owner_id, name, species, age FROM pets WHERE owner_id = ?"
+        rows = self.db.fetch_all(query, (owner_id,))
 
-pet_management = PetManagement()
-pet_management.add_pet()
-pet_management.view_pets()
+        return [
+            PetFactory.create_pet(
+                species=row["species"],
+                name=row["name"],
+                owner_id=row["owner_id"],
+                age=row["age"],
+                pet_id=row["pet_id"],
+            )
+            for row in rows
+        ]
+
+    def get_all_pets(self):
+        """Retrieves all pets registered in the clinic."""
+        query = "SELECT pet_id, owner_id, name, species, age FROM pets ORDER BY name ASC"
+        rows = self.db.fetch_all(query)
+
+        return [
+            PetFactory.create_pet(
+                species=row["species"],
+                name=row["name"],
+                owner_id=row["owner_id"],
+                age=row["age"],
+                pet_id=row["pet_id"],
+            )
+            for row in rows
+        ]
