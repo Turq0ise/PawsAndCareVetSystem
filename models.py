@@ -16,7 +16,6 @@ class Owner:
 
 class Pet(ABC):
     def __init__(self, name, owner_id, pet_id, age):
-        # Deterministically derives ID from owner + name if not provided
         self.pet_id = pet_id or idGen(f"{owner_id}_{name}", "PET")
         self.name = name
         self.owner_id = owner_id

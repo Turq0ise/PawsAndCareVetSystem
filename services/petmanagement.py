@@ -30,14 +30,12 @@ class PetManagement:
         if not clean_owner_id:
             raise ValueError("Owner ID cannot be empty.")
 
-        # Ensure the owner exists in the database before assigning a pet
         owner_exists = self.db.fetch_one(
             "SELECT owner_id FROM owners WHERE owner_id = ?", (clean_owner_id,)
         )
         if not owner_exists:
             raise ValueError(f"Owner with ID '{clean_owner_id}' does not exist.")
 
-        # Instantiates the appropriate subclass using PetFactory
         pet = PetFactory.create_pet(
             species=pet_type,
             name=clean_name,

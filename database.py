@@ -12,16 +12,13 @@ class ClinicDatabase:
         return cls._instance
 
     def __init__(self, db_name="clinic.db"):
-        # Prevent re-initialization if the singleton instance already exists
         if getattr(self, "_initialized", False):
             return
 
         self.db_name = db_name
         self.connection = sqlite3.connect(self.db_name)
-        # Enable row access by column name
         self.connection.row_factory = sqlite3.Row
         
-        # Enforce foreign key constraints in SQLite
         self.connection.execute("PRAGMA foreign_keys = ON;")
         
         self._create_tables()
@@ -31,7 +28,6 @@ class ClinicDatabase:
         """Creates the required tables if they do not already exist."""
         cursor = self.connection.cursor()
 
-        # 1. Owners Table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS owners (
                 owner_id TEXT PRIMARY KEY,
@@ -40,7 +36,6 @@ class ClinicDatabase:
             );
         """)
 
-        # 2. Pets Table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS owners (
                 pet_id TEXT PRIMARY KEY,
@@ -53,7 +48,6 @@ class ClinicDatabase:
             );
         """)
 
-        # 3. Appointments Table
         cursor.execute("""
             CREATE TABLE IF NOT EXISTS appointments (
                 appointment_id TEXT PRIMARY KEY,

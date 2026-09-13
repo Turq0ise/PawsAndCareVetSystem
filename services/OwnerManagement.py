@@ -29,7 +29,6 @@ class OwnerManagement:
         if not clean_contact:
             raise ValueError("Contact number cannot be empty.")
 
-        # Model generates the deterministic UUID using idGen(contact_number, "OWNER")
         owner = Owner(name=clean_name, contact_number=clean_contact)
 
         query = """

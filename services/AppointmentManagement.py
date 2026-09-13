@@ -35,7 +35,6 @@ class AppointmentManagement:
         if not clean_date or not clean_time:
             raise ValueError("Date and time must both be provided.")
 
-        # Ensure the pet exists
         pet_exists = self.db.fetch_one(
             "SELECT pet_id FROM pets WHERE pet_id = ?", (clean_pet_id,)
         )
