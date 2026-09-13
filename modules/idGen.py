@@ -5,12 +5,16 @@ PET_NAMESPACE = uuid.uuid5(ROOT_NAMESPACE, "PET")
 APPOINTMENT_NAMESPACE = uuid.uuid5(ROOT_NAMESPACE, "APPOINTMENT")
 
 def idGen(value, context):
-    value = value.upper()
+    value = str(value).upper()
 
     match context.upper():
         case "OWNER" | "OWNERS":
             return str(uuid.uuid5(OWNER_NAMESPACE, value))
         case "PET" | "PETS":
             return str(uuid.uuid5(PET_NAMESPACE, value))
-        case "APPOINTMENTS" | "APPOINTMENTS":
+        case "APPOINTMENT" | "APPOINTMENTS":
             return str(uuid.uuid5(APPOINTMENT_NAMESPACE, value))
+        case _:
+            raise ValueError(
+                f"Invalid context '{context}'. Expected 'OWNER', 'PET', or 'APPOINTMENT'."
+            )

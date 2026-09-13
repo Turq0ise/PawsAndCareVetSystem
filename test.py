@@ -15,26 +15,26 @@ cursor.execute('''
     CREATE TABLE IF NOT EXISTS owners (
         owner_id TEXT PRIMARY KEY,
         name TEXT NOT NULL,
-        contact_number INTEGER
+        contact_number TEXT
     )
 ''')
 
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS pets (
         pet_id TEXT PRIMARY KEY,
-        owner_id text REFERENCES owners(owner_id)
+        owner_id text REFERENCES owners(owner_id),
         name TEXT NOT NULL,
-        species TEXT NOT NULL,
+        species TEXT NOT NULL
     )
 ''')
 
 cursor.execute('''
     CREATE TABLE IF NOT EXISTS appointments (
         appointment_id TEXT PRIMARY KEY,
-        pet_id TEXT REFERENCES pet(pet_id),
+        pet_id TEXT REFERENCES pets(pet_id),
         reason TEXT,
-        date DATE,
-        time TIME,
+        date TEXT,
+        time TEXT,
         status TEXT
     )
 ''')
