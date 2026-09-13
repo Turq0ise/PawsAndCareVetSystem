@@ -37,7 +37,7 @@ class ClinicDatabase:
         """)
 
         cursor.execute("""
-            CREATE TABLE IF NOT EXISTS owners (
+            CREATE TABLE IF NOT EXISTS pets (
                 pet_id TEXT PRIMARY KEY,
                 owner_id TEXT NOT NULL,
                 name TEXT NOT NULL,
@@ -66,8 +66,12 @@ class ClinicDatabase:
     def execute_query(self, query: str, params: tuple = ()):
         """Executes an INSERT, UPDATE, or DELETE query and commits changes."""
         cursor = self.connection.cursor()
-        cursor.execute(query, params)
-        self.connection.commit()
+        try:
+            cursor.execute(query, params)
+            self.connection.commit()
+        except sqlite3.Error:
+            self.connection.rollback()
+            raise
         return cursor
 
     def fetch_all(self, query: str, params: tuple = ()):
