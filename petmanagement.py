@@ -8,7 +8,7 @@ class pet:
     def display_info(self):
         print("Pet Name: " + str(self.pet_id))
         print("Species: " + self.species)
-        print("Age: " + str(self.age))
+        print("Pet Age: " + str(self.age))
         print("Owner ID: " + str(self.owner_id))
 
     def get_info(self):
@@ -34,7 +34,7 @@ class PetManagement:
     def add_pet(self):
         pet_name = input("Enter pet name: ")
         species = input("Enter species: ")
-        age = int(input("Enter age: "))
+        age = int(input("Enter pet age: "))
         owner_id = input("Enter owner ID: ")
 
         if species.lower() == "dog":
@@ -78,10 +78,5 @@ class PetManagement:
 
 
 pet_management = PetManagement()
-
 pet_management.add_pet()
-pet_management.add_pet()
-
 pet_management.view_pets()
-
-
