@@ -5,7 +5,7 @@ from models import Owner
 class OwnerManagement:
     """Service layer handling business logic for Pet Owners."""
 
-    def __init__(self, db):
+    def __init__(self, db=None):
         self.db = db or ClinicDatabase()
 
     def register_owner(self, name, contact_number):
@@ -21,15 +21,19 @@ class OwnerManagement:
         Raises:
             ValueError: If input validation fails or if the owner already exists.
         """
+        if not isinstance(name, str):
+            raise ValueError("Owner name must be text.")
+        if not isinstance(contact_number, str):
+            raise ValueError("Contact number must be text.")
         clean_name = name.strip()
-        clean_contact = str(contact_number).strip()
+        clean_contact = contact_number.strip()
 
         if not clean_name:
             raise ValueError("Owner name cannot be empty.")
         if not clean_contact:
             raise ValueError("Contact number cannot be empty.")
 
-        owner = Owner(name=clean_name, contact_number=clean_contact)
+        owner = Owner(owner_id=None, name=clean_name, contact_number=clean_contact)
 
         query = """
             INSERT INTO owners (owner_id, name, contact_number)

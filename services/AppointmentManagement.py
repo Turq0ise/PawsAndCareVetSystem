@@ -99,9 +99,9 @@ class AppointmentManagement:
 
     def update_status(self, appointment_id, new_status):
         """Updates the status of an appointment ('Scheduled', 'Completed', 'Cancelled')."""
-        if new_status not in Appointment.VALID_STATUSES:
+        if new_status not in Appointment.valid_status:
             raise ValueError(
-                f"Invalid status '{new_status}'. Allowed: {Appointment.VALID_STATUSES}"
+                f"Invalid status '{new_status}'. Allowed: {Appointment.valid_status}"
             )
 
         record = self.get_appointment_by_id(appointment_id)
@@ -132,10 +132,10 @@ class AppointmentManagement:
             status=row["status"],
         )
 
-    def get_appointments(self, status):
+    def get_appointments(self, status=None):
         """Retrieves appointments, optionally filtered by status."""
         if status:
-            if status not in Appointment.VALID_STATUSES:
+            if status not in Appointment.valid_status:
                 raise ValueError(f"Invalid status filter '{status}'.")
             query = """
                 SELECT appointment_id, pet_id, reason, date, time, status

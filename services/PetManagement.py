@@ -8,7 +8,7 @@ class PetManagement:
     def __init__(self, db=None):
         self.db = db if db is not None else ClinicDatabase()
 
-    def add_pet(self, owner_id, pet_type, name, age):
+    def add_pet(self, owner_id, pet_type, name, age=None):
         """Creates a pet via PetFactory and links it to an existing owner.
 
         Args:
@@ -43,6 +43,7 @@ class PetManagement:
             species=pet_type,
             name=clean_name,
             owner_id=clean_owner_id,
+            pet_id=None,
             age=age,
         )
 
