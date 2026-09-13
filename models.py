@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from modules.idGen import idGen
 
 class Owner:
-    def __init__(self, owner_id, name, contact_number):
+    def __init__(self, name, contact_number, owner_id = None):
         self.owner_id = owner_id or idGen(contact_number, "OWNER")
         self.name = name
         self.contact_number = contact_number
@@ -15,7 +15,7 @@ class Owner:
         }
 
 class Pet(ABC):
-    def __init__(self, name, owner_id, pet_id, age):
+    def __init__(self, name, owner_id, age, pet_id = None):
         self.pet_id = pet_id or idGen(f"{owner_id}_{name}", "PET")
         self.name = name
         self.owner_id = owner_id
@@ -68,7 +68,8 @@ class PetFactory:
     }
 
     @classmethod
-    def create_pet(cls, species, name, owner_id, pet_id, age):
+    def create_pet(cls, species, name, owner_id, age, pet_id = None):
+        pet_id = pet_id or idGen(f"{owner_id}_{name}", "PET")
         normalized_species = species.strip().lower()
 
         pet_class = cls.valid_species.get(normalized_species)
@@ -83,15 +84,7 @@ class PetFactory:
 class Appointment:
     valid_status = {"Scheduled", "Completed", "Cancelled"}
 
-    def __init__(
-        self,
-        pet_id: str,
-        date: str,
-        time: str,
-        reason: str = "",
-        status: str = "Scheduled",
-        appointment_id: str = None,
-    ):
+    def __init__(self, pet_id, date, time, reason = "", status = "Scheduled", appointment_id = None):
         if status not in self.valid_status:
             raise ValueError(
                 f"Invalid status '{status}'. Must be one of: {self.valid_status}"
